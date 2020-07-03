@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODELS = os.path.join(BASE_DIR, 'duplicate_detector/models')
+MODELS = os.path.join(BASE_DIR, 'duplicate_detector/predictor/models')
 
 
 # Quick-start development settings - unsuitable for production
