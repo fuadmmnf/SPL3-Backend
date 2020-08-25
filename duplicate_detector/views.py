@@ -11,10 +11,10 @@ def test_api(request):
 
 
 
-def check_prduplicates(request):
+def check_duplicates(request):
     if request.method != 'POST':
         return JsonResponse({'res': 'must be post request with pr list data'})
 
     data = json.loads(request.body)
-    PrduplicateDetector().detect_duplicate(data['pr_list'])
+    PrduplicateDetector().check_similarity(data['files'])
 
