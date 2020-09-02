@@ -19,5 +19,5 @@ def check_duplicates(request):
         return JsonResponse({'res': 'must be post request with pr list data'})
 
     data = json.loads(request.body)
-    FileDuplicateDetector().check_similarity(data['files'])
-    return JsonResponse({'data': 'adasd'})
+    file_clonepredictions = FileDuplicateDetector().check_similarity(data['files'])
+    return JsonResponse({'data':file_clonepredictions}, safe=False)
