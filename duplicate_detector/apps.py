@@ -25,7 +25,6 @@ class DuplicateDetectorConfig(AppConfig):
 
     # max_timestamps = max(line.count(' ') for line in open('res/method_embeddings.txt')) + 100
     max_timestamps = 10000
-    print('max timestamps:', max_timestamps)
 
     nmt_model_path = 'nmt/nmt_encoder.h5'
     abs_nmt_model_path = os.path.join(settings.MODELS, nmt_model_path)
@@ -35,3 +34,5 @@ class DuplicateDetectorConfig(AppConfig):
     astnn_model_path = 'astnn/astnn.h5'
     abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
     astnn_model = load_model(abs_astnn_model_path)
+
+    print('loading final stage')

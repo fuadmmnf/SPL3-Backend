@@ -2,7 +2,10 @@ from django.http import JsonResponse
 import json
 
 from .apps import DuplicateDetectorConfig
-from .evaluator.prduplicate_evaluator import PrduplicateDetector
+from .evaluator.fileduplicate_evaluator import FileDuplicateDetector
+from django.views.decorators.csrf import csrf_exempt
+
+
 
 def test_api(request):
     return JsonResponse({'res': DuplicateDetectorConfig.encoder_encoding_dim})
@@ -10,11 +13,11 @@ def test_api(request):
 
 
 
-
+@csrf_exempt
 def check_duplicates(request):
     if request.method != 'POST':
         return JsonResponse({'res': 'must be post request with pr list data'})
 
     data = json.loads(request.body)
-    PrduplicateDetector().check_similarity(data['files'])
-
+    FileDuplicateDetector().check_similarity(data['files'])
+    return JsonResponse({'data': 'adasd'})

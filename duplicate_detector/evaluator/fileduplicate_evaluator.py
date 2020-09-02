@@ -1,11 +1,9 @@
 import javalang
-import numpy as np
-import requests
-import base64
+
 from duplicate_detector.predictor.method_clone_detection import MethodRepresentationCalculator
 
 
-class PrduplicateDetector():
+class FileDuplicateDetector():
     def check_similarity(self, files):
         file_method_repr_list = []
         method_repr_calculator = MethodRepresentationCalculator()
@@ -18,11 +16,11 @@ class PrduplicateDetector():
                     if type(t) == javalang.tree.MethodDeclaration:
                         file_method_repr_list[-1]['methods'].append({
                             'name': t.name,
-                            'line_number': t.line,
+                            'line_number': t.position,
                             'repr': method_repr_calculator.calculateMethodRepresentation(t)
                         })
             except Exception as e:
                 print(e)
                 print(file)
 
-        return None
+        print(file_method_repr_list)

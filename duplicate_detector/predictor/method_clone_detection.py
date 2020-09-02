@@ -1,11 +1,12 @@
 import numpy as np
 
+# from ..apps import DuplicateDetectorConfig
+from duplicate_detector.apps import DuplicateDetectorConfig
 import sys
 import os
 import javalang
-from duplicate_detector.apps import DuplicateDetectorConfig
 from gensim.models import FastText
-from .attention_decoder import AttentionDecoder
+# from .attention_decoder import AttentionDecoder
 from keras.models import load_model
 from keras.models import Sequential
 from keras.models import Model
@@ -18,25 +19,25 @@ deprecation._PRINT_DEPRECATION_WARNINGS = False
 sys.setrecursionlimit(5000)
 StatementTrees = []
 StTreeNodesForMaxPooling = []
-
-word_vectors = FastText.load("model/fasttext/fasttext.model", mmap='r').wv
-# vocab_size, wordvec_emdedding_size = word_vectors.vectors.shape
-script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-encoder_model_path = 'model/encoder/encoder.h5'
-abs_encoder_model_path = os.path.join(script_dir, encoder_model_path)
-
-encoder_model = load_model(abs_encoder_model_path)
-encoder_encoding_dim = encoder_model.layers[-1].output_shape[1]
-
-max_timestamps = max(line.count(' ') for line in open('res/method_embeddings.txt')) + 100
-print('max timestamps:', max_timestamps)
-
-nmt_model_path = 'model/nmt/nmt_encoder.h5'
-abs_nmt_model_path = os.path.join(script_dir, nmt_model_path)
-
+#
+# word_vectors = FastText.load("model/fasttext/fasttext.model", mmap='r').wv
+# # vocab_size, wordvec_emdedding_size = word_vectors.vectors.shape
+# script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+# encoder_model_path = 'model/encoder/encoder.h5'
+# abs_encoder_model_path = os.path.join(script_dir, encoder_model_path)
+#
+# encoder_model = load_model(abs_encoder_model_path)
+# encoder_encoding_dim = encoder_model.layers[-1].output_shape[1]
+#
+# max_timestamps = max(line.count(' ') for line in open('res/method_embeddings.txt')) + 100
+# print('max timestamps:', max_timestamps)
+#
+# nmt_model_path = 'model/nmt/nmt_encoder.h5'
+# abs_nmt_model_path = os.path.join(script_dir, nmt_model_path)
+#
 # nmt_encoder_model = load_model(abs_nmt_model_path,  custom_objects={'AttentionDecoder': AttentionDecoder})
-nmt_encoder_model = load_model(abs_nmt_model_path)
-
+# nmt_encoder_model = load_model(abs_nmt_model_path)
+#
 
 # print(nmt_encoder_model.summary())
 # quit()
@@ -54,14 +55,14 @@ class MethodRepresentationCalculator:
         for maxpooled_stTree in maxpooled_stTrees:
             methodInput.extend(maxpooled_stTree.tolist())
 
-        spaceForPadding = (max_timestamps * encoder_encoding_dim) - len(methodInput)
+        spaceForPadding = (DuplicateDetectorConfig.max_timestamps * DuplicateDetectorConfig.encoder_encoding_dim) - len(methodInput)
         # print('method vector length actual: ', len(methodInput))
         methodInput.extend([0 for x in range(spaceForPadding)])
 
-        stTreeInput = np.asarray(methodInput).reshape(max_timestamps, encoder_encoding_dim)
+        stTreeInput = np.asarray(methodInput).reshape(DuplicateDetectorConfig.max_timestamps, DuplicateDetectorConfig.encoder_encoding_dim)
         input = np.asarray([stTreeInput])
 
-        stTreeNmtRepr = nmt_encoder_model.predict(input, verbose=0)
+        stTreeNmtRepr = DuplicateDetectorConfig.nmt_encoder_model.predict(input, verbose=0)
         nmt_encoded_stTrees.append(stTreeNmtRepr[0])
 
         return self.maxpooling(nmt_encoded_stTrees)
@@ -69,7 +70,7 @@ class MethodRepresentationCalculator:
     def __computeEncodedTree(self, node):
         global StTreeNodesForMaxPooling
         nodeVecs = {}
-        child_sum = np.zeros(encoder_encoding_dim)
+        child_sum = np.zeros(DuplicateDetectorConfig.encoder_encoding_dim)
         childNodesList = []
 
         for _, subnode in node:
@@ -80,16 +81,16 @@ class MethodRepresentationCalculator:
             subnode_str = str(subnode).replace('\"', '_').replace('\'', '_').replace(' ', '')
 
             childNodesList.append({subnode_str: subnode.children})
-            fasttext_embedding = word_vectors[subnode_str].reshape(1, 128)
+            fasttext_embedding = DuplicateDetectorConfig.word_vectors[subnode_str].reshape(1, 128)
             # print(fasttext_embedding.shape)
             # quit()
-            subnode_encoding = encoder_model.predict(fasttext_embedding, verbose=0)
+            subnode_encoding = DuplicateDetectorConfig.encoder_model.predict(fasttext_embedding, verbose=0)
             nodeVecs[subnode_str] = subnode_encoding
 
             for child in subnode.children:
                 child_str = str(child).replace('\"', '_').replace('\'', '_').replace(' ', '')
-                fasttext_embedding = word_vectors[child_str].reshape(1, 128)
-                subnode_encoding = encoder_model.predict(fasttext_embedding, verbose=0)
+                fasttext_embedding = DuplicateDetectorConfig.word_vectors[child_str].reshape(1, 128)
+                subnode_encoding = DuplicateDetectorConfig.encoder_model.predict(fasttext_embedding, verbose=0)
                 nodeVecs[child_str] = subnode_encoding
 
         for nodeDict in reversed(childNodesList):
