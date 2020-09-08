@@ -7,7 +7,7 @@ from keras.models import load_model
 from tensorflow.python.util import deprecation
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
-sys.setrecursionlimit(5000)
+sys.setrecursionlimit(10000)
 
 
 class DuplicateDetectorConfig(AppConfig):
@@ -22,9 +22,10 @@ class DuplicateDetectorConfig(AppConfig):
     abs_encoder_model_path = os.path.join(settings.MODELS, encoder_model_path)
     encoder_model = load_model(abs_encoder_model_path)
     encoder_encoding_dim = encoder_model.layers[-1].output_shape[1]
-
+    print("encoder dim: ", encoder_encoding_dim)
     # max_timestamps = max(line.count(' ') for line in open('res/method_embeddings.txt')) + 100
-    max_timestamps = 10000
+    # max_timestamps = 10000
+    max_timestamps = 194
 
     nmt_model_path = 'nmt/nmt_encoder.h5'
     abs_nmt_model_path = os.path.join(settings.MODELS, nmt_model_path)
@@ -34,5 +35,5 @@ class DuplicateDetectorConfig(AppConfig):
     astnn_model_path = 'astnn/astnn.h5'
     abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
     astnn_model = load_model(abs_astnn_model_path)
-
+    print(astnn_model.summary())
     print('loading final stage')

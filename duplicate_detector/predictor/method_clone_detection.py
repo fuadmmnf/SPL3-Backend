@@ -16,9 +16,7 @@ from tensorflow.python.util import deprecation
 
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
-sys.setrecursionlimit(5000)
-StatementTrees = []
-StTreeNodesForMaxPooling = []
+
 #
 # word_vectors = FastText.load("model/fasttext/fasttext.model", mmap='r').wv
 # # vocab_size, wordvec_emdedding_size = word_vectors.vectors.shape
@@ -43,10 +41,16 @@ StTreeNodesForMaxPooling = []
 # quit()
 class MethodRepresentationCalculator:
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.StatementTrees = []
+        self.StTreeNodesForMaxPooling = []
+        sys.setrecursionlimit(10000)
+
     def maxpooling(self, arr):
         stTreesVecs = np.asarray(arr)
         maxpooledEncoding = np.amax(stTreesVecs, axis=0)
-
+        print(maxpooledEncoding[0])
         return maxpooledEncoding[0]
 
     def __makeNmtRepresentation(self, maxpooled_stTrees):
@@ -68,7 +72,6 @@ class MethodRepresentationCalculator:
         return self.maxpooling(nmt_encoded_stTrees)
 
     def __computeEncodedTree(self, node):
-        global StTreeNodesForMaxPooling
         nodeVecs = {}
         child_sum = np.zeros(DuplicateDetectorConfig.encoder_encoding_dim)
         childNodesList = []
@@ -106,22 +109,20 @@ class MethodRepresentationCalculator:
         # node_vec = node_encoding + child_sum
 
         for key in nodeVecs:
-            StTreeNodesForMaxPooling.append(nodeVecs[key])
+            self.StTreeNodesForMaxPooling.append(nodeVecs[key])
 
     def __encodeStTrees(self):
-        global StatementTrees
-        global StTreeNodesForMaxPooling
         maxpooled_stTrees = []
 
         print('started encoding...')
 
-        for tree in StatementTrees:
+        for tree in self.StatementTrees:
             self.__computeEncodedTree(tree)
 
-            maxpooled_stTrees.append(self.maxpooling(StTreeNodesForMaxPooling))
+            maxpooled_stTrees.append(self.maxpooling(self.StTreeNodesForMaxPooling))
 
             # maxpooling and write all st tree of methods to file
-            StTreeNodesForMaxPooling = []
+            self.StTreeNodesForMaxPooling = []
 
         print('finished encoding...')
 
@@ -141,7 +142,6 @@ class MethodRepresentationCalculator:
                     node.name = None
 
     def __handleSubStatement(self, statement):
-        global StatementTrees
         isStatementValid = True
         subStatement = None
 
@@ -160,7 +160,7 @@ class MethodRepresentationCalculator:
         # 	del statement.expression
 
         if isStatementValid:
-            StatementTrees.append(statement)
+            self.StatementTrees.append(statement)
         # appendToCorpus(statement)
 
         if subStatement is not None:
@@ -174,11 +174,10 @@ class MethodRepresentationCalculator:
             self.__handleSubStatement(statementBlock)
 
     def __computeMethodRepresentation(self, astmethod):
-        global StatementTrees
         try:
 
             self.__clean_statement(astmethod)
-            # StatementTrees.append(t)
+            # self.StatementTrees.append(t)
             # appendToCorpus(t)
             self.__pluckStatementAndAppendToStatementTree(astmethod)
             encoded_stTrees = self.__encodeStTrees()
@@ -186,7 +185,7 @@ class MethodRepresentationCalculator:
             # print(method_representation)
             # print('\n\n\n')
 
-            StatementTrees = []
+            self.StatementTrees = []
 
             return method_representation
 
@@ -194,12 +193,11 @@ class MethodRepresentationCalculator:
             print(e)
             print('\n\n\n')
             quit()
-            StatementTrees = []
+            self.StatementTrees = []
             return
 
     def __parseMethodAndReturnRepresentation(self, filepath, startline, endline):
         # print(filepath)
-        global StatementTrees
         try:
             fileData = ''
             with open(filepath, 'r', encoding='utf-8') as file:
@@ -212,8 +210,8 @@ class MethodRepresentationCalculator:
             tree = javalang.parse.parse(code_segment)  # Create your   here.
             for t in tree.types[0].body:
                 if type(t) == javalang.tree.MethodDeclaration:
-                    self.self.__clean_statement(t)
-                    # StatementTrees.append(t)
+                    self.__clean_statement(t)
+                    # self.StatementTrees.append(t)
                     # appendToCorpus(t)
                     self.__pluckStatementAndAppendToStatementTree(t)
                     # print('starting calc')
@@ -224,7 +222,7 @@ class MethodRepresentationCalculator:
                     # print(method_representation)
                     # print('\n\n\n')
 
-                    StatementTrees = []
+                    self.StatementTrees = []
 
                     return method_representation
 
@@ -233,11 +231,12 @@ class MethodRepresentationCalculator:
             print(e)
             print('\n\n\n')
             # quit()
-            StatementTrees = []
+            self.StatementTrees = []
             return None
 
     def calculateMethodRepresentation(self, astmethod):
         method_repr = self.__computeMethodRepresentation(astmethod)
+        print('\n\n\n', method_repr)
         return method_repr
         # methodDiff = np.absolute(method1Repr - method2Repr).reshape(1, 200)
 
