@@ -12,7 +12,7 @@ sys.setrecursionlimit(10000)
 
 class DuplicateDetectorConfig(AppConfig):
     name = 'duplicate_detector'
-    categories = 5
+    CATEGORIES_COUNT = 5
 
     word2vec_model_path = 'word2vec/node_w2v_128'
     abs_fasttext_model_path = os.path.join(settings.MODELS, word2vec_model_path)
@@ -31,11 +31,12 @@ class DuplicateDetectorConfig(AppConfig):
     BATCH_SIZE = 16
     USE_GPU = False
 
-    astnn_models = [None]
-    for i in range(1, categories):
+    LOSS_FUNCTION = torch.nn.BCELoss()
+    ASTNN_MODELS = [None]
+    for i in range(1, CATEGORIES_COUNT):
         astnn_model_path = 'astnn/modelClone' + str(i)
         abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
         model = BatchProgramCC(EMBEDDING_DIM, HIDDEN_DIM, MAX_TOKENS + 1, ENCODE_DIM, LABELS, BATCH_SIZE, USE_GPU,
                                embeddings)
         model.load_state_dict(torch.load(abs_astnn_model_path))
-        astnn_models.append(model)
+        ASTNN_MODELS.append(model)

@@ -1,9 +1,5 @@
-import json
-
 import javalang
 from itertools import combinations
-
-import numpy as np
 from duplicate_detector.predictor.method_clone_detection import MethodRepresentationCalculator
 
 
@@ -53,7 +49,7 @@ class FileDuplicateDetector():
         for file1_method in file1['methods']:
             for file2_method in file2['methods']:
                 # print(file1_method['name'], file2_method['name'], 'prediction: ' + str(clone_probability[0][0]))
-                output = self.method_clone_predictor.predict_clone(file1_method['repr'], file2_method['repr'])
+                outputs = self.method_clone_predictor.predict_clone(file1_method['repr'], file2_method['repr'])
 
                 self.file_clonepredictions.append({
                     'id': file1['name'] + '_' + file2['name'],
@@ -67,7 +63,13 @@ class FileDuplicateDetector():
                         'name': file2_method['name'],
                         'line_number': file2_method['line_number'].line
                     },
-                    'probability': json.dumps(str(clone_probability[0][0])),
-                    'type': self.__getCloneType(clone_probability[0][0]),
+                    'probabilities': outputs,
+                    'type': self.__getCloneType(outputs),
                 })
-        # print('\n\n\n')
+
+    def __getCloneType(self, outputs):
+        for val, i in enumerate(outputs[1:]):
+            if (val > 0.5):
+                return 'Type-' + str(i)
+
+        return 'N\A'
