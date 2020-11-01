@@ -2,38 +2,40 @@ from django.apps import AppConfig
 import sys
 import os
 from django.conf import settings
-from gensim.models import FastText
-from keras.models import load_model
-from tensorflow.python.util import deprecation
-deprecation._PRINT_DEPRECATION_WARNINGS = False
+import numpy as np
+import torch
+from gensim.models.word2vec import Word2Vec
+from duplicate_detector.predictor.model import BatchProgramCC
 
 sys.setrecursionlimit(10000)
 
 
 class DuplicateDetectorConfig(AppConfig):
     name = 'duplicate_detector'
+    categories = 5
 
-    fasttext_model_path = 'fasttext/fasttext.model'
-    abs_fasttext_model_path = os.path.join(settings.MODELS, fasttext_model_path)
-    word_vectors = FastText.load(abs_fasttext_model_path, mmap='r').wv
-    # vocab_size, wordvec_emdedding_size = word_vectors.vectors.shape
+    word2vec_model_path = 'word2vec/node_w2v_128'
+    abs_fasttext_model_path = os.path.join(settings.MODELS, word2vec_model_path)
+    word2vec = Word2Vec.load(abs_fasttext_model_path).wv
+    word2vec_vocab = word2vec.vocab
 
-    encoder_model_path = 'encoder/encoder.h5'
-    abs_encoder_model_path = os.path.join(settings.MODELS, encoder_model_path)
-    encoder_model = load_model(abs_encoder_model_path)
-    encoder_encoding_dim = encoder_model.layers[-1].output_shape[1]
-    print("encoder dim: ", encoder_encoding_dim)
-    # max_timestamps = max(line.count(' ') for line in open('res/method_embeddings.txt')) + 100
-    # max_timestamps = 10000
-    max_timestamps = 194
+    MAX_TOKENS = word2vec.syn0.shape[0]
+    EMBEDDING_DIM = word2vec.syn0.shape[1]
+    embeddings = np.zeros((MAX_TOKENS + 1, EMBEDDING_DIM), dtype="float32")
+    embeddings[:word2vec.syn0.shape[0]] = word2vec.syn0
 
-    nmt_model_path = 'nmt/nmt_encoder.h5'
-    abs_nmt_model_path = os.path.join(settings.MODELS, nmt_model_path)
-    # nmt_encoder_model = load_model(abs_nmt_model_path,  custom_objects={'AttentionDecoder': AttentionDecoder})
-    nmt_encoder_model = load_model(abs_nmt_model_path)
+    HIDDEN_DIM = 100
+    ENCODE_DIM = 128
+    LABELS = 1
+    EPOCHS = 5
+    BATCH_SIZE = 16
+    USE_GPU = False
 
-    astnn_model_path = 'astnn/astnn.h5'
-    abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
-    astnn_model = load_model(abs_astnn_model_path)
-    print(astnn_model.summary())
-    print('loading final stage')
+    astnn_models = [None]
+    for i in range(1, categories):
+        astnn_model_path = 'astnn/modelClone' + str(i)
+        abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
+        model = BatchProgramCC(EMBEDDING_DIM, HIDDEN_DIM, MAX_TOKENS + 1, ENCODE_DIM, LABELS, BATCH_SIZE, USE_GPU,
+                               embeddings)
+        model.load_state_dict(torch.load(abs_astnn_model_path))
+        astnn_models.append(model)
