@@ -37,6 +37,6 @@ class MethodRepresentationCalculator:
             model.zero_grad()
             model.batch_size = 1
             model.hidden = model.init_hidden()
-            outputs.append(model(method1_seq, method2_seq))
+            outputs.append(model([method1_seq], [method2_seq])[0].item())
 
         return outputs

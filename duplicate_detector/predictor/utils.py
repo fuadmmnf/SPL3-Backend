@@ -1,7 +1,5 @@
-import pandas as pd
-import javalang
 from javalang.ast import Node
-from tree import ASTNode, BlockNode
+from duplicate_detector.predictor.tree import ASTNode, BlockNode
 import sys
 sys.setrecursionlimit(10000)
 
@@ -69,7 +67,7 @@ def get_blocks_v1(node, block_seq):
     elif name is 'BlockStatement' or hasattr(node, 'block'):
         block_seq.append(BlockNode(name))
         for child in children:
-            if get_token(child)not in logic:
+            if get_token(child) not in logic:
                 block_seq.append(BlockNode(child))
             else:
                 get_blocks_v1(child, block_seq)

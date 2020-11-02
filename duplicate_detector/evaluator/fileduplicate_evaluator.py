@@ -17,7 +17,6 @@ class FileDuplicateDetector():
         for file_combination in file_combinations:
             self.__predictMethodClones(file_combination[0], file_combination[1])
 
-        print(self.file_clonepredictions)
         return self.file_clonepredictions
         # print(file_combination[0]['name'], file_combination[1]['name'])
 
@@ -32,6 +31,7 @@ class FileDuplicateDetector():
                 'repr': method_tree
             }
         except Exception as e:
+            print(e)
             return None
 
     def __generateMethodRepresentations(self, file):
@@ -40,7 +40,11 @@ class FileDuplicateDetector():
             file_tree = javalang.parse.parse(file['content'])
 
             for path, node in file_tree.filter(javalang.tree.MethodDeclaration):
-                self.file_method_repr_list[-1]['methods'].append(self.__generateMethodTree(node))
+                self.file_method_repr_list[-1]['methods'].append({
+                    'name': node.name,
+                    'line_number': node.position,
+                    'repr': node
+                })
         except Exception as e:
             print(e)
             print(file)
@@ -50,7 +54,7 @@ class FileDuplicateDetector():
             for file2_method in file2['methods']:
                 # print(file1_method['name'], file2_method['name'], 'prediction: ' + str(clone_probability[0][0]))
                 outputs = self.method_clone_predictor.predict_clone(file1_method['repr'], file2_method['repr'])
-
+                print(outputs)
                 self.file_clonepredictions.append({
                     'id': file1['name'] + '_' + file2['name'],
                     'file1': file1['name'],
@@ -63,13 +67,13 @@ class FileDuplicateDetector():
                         'name': file2_method['name'],
                         'line_number': file2_method['line_number'].line
                     },
-                    'probabilities': outputs,
+                    # 'probabilities': outputs,
                     'type': self.__getCloneType(outputs),
                 })
 
     def __getCloneType(self, outputs):
-        for val, i in enumerate(outputs[1:]):
+        for i, val in enumerate(outputs):
             if (val > 0.5):
-                return 'Type-' + str(i)
+                return 'Type-' + str(i) + ', probability: ' + str(val)
 
         return 'N\A'
