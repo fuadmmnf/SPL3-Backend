@@ -1,3 +1,5 @@
+import uuid
+
 import javalang
 from itertools import combinations
 from duplicate_detector.predictor.method_clone_detection import MethodRepresentationCalculator
@@ -56,7 +58,7 @@ class FileDuplicateDetector():
                 outputs = self.method_clone_predictor.predict_clone(file1_method['repr'], file2_method['repr'])
                 print(outputs)
                 self.file_clonepredictions.append({
-                    'id': file1['name'] + '_' + file2['name'],
+                    'id': str(uuid.uuid4()),
                     'file1': file1['name'],
                     'file2': file2['name'],
                     'file1_method': {
@@ -74,6 +76,6 @@ class FileDuplicateDetector():
     def __getCloneType(self, outputs):
         for i, val in enumerate(outputs):
             if (val > 0.5):
-                return 'Type-' + str(i) + ', probability: ' + str(val)
+                return {'name': 'Type-' + str(i), 'probability': str(val)}
 
-        return 'N\A'
+        return {'name': 'N\A', 'probability': ''}
