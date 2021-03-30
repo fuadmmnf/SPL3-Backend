@@ -57,25 +57,28 @@ class FileDuplicateDetector():
                 # print(file1_method['name'], file2_method['name'], 'prediction: ' + str(clone_probability[0][0]))
                 outputs = self.method_clone_predictor.predict_clone(file1_method['repr'], file2_method['repr'])
                 print(outputs)
-                self.file_clonepredictions.append({
-                    'id': str(uuid.uuid4()),
-                    'file1': file1['name'],
-                    'file2': file2['name'],
-                    'file1_method': {
-                        'name': file1_method['name'],
-                        'line_number': file1_method['line_number'].line
-                    },
-                    'file2_method': {
-                        'name': file2_method['name'],
-                        'line_number': file2_method['line_number'].line
-                    },
-                    # 'probabilities': outputs,
-                    'type': self.__getCloneType(outputs),
-                })
+                for i, val in enumerate(outputs):
+                    if (val > 0.5):
+                        self.file_clonepredictions.append({
+                            'id': str(uuid.uuid4()),
+                            'file1': file1['name'],
+                            'file2': file2['name'],
+                            'file1_method': {
+                                'name': file1_method['name'],
+                                'line_number': file1_method['line_number'].line
+                            },
+                            'file2_method': {
+                                'name': file2_method['name'],
+                                'line_number': file2_method['line_number'].line
+                            },
+                            # 'probabilities': outputs,
+                            'type': {'name': 'Type-' + str(i), 'probability': str(val)},
+                        })
+                        break
 
-    def __getCloneType(self, outputs):
-        for i, val in enumerate(outputs):
-            if (val > 0.5):
-                return {'name': 'Type-' + str(i), 'probability': str(val)}
-
-        return {'name': 'N\A', 'probability': ''}
+    # def __getCloneType(self, outputs):
+    #     for i, val in enumerate(outputs):
+    #         if (val > 0.5):
+    #             return {'name': 'Type-' + str(i), 'probability': str(val)}
+    #
+    #     return {'name': 'N\A', 'probability': ''}
