@@ -51,8 +51,8 @@ tensorboard-plugin-wit==1.7.0
 tensorflow-estimator==2.2.0
 termcolor==1.1.0
 threadpoolctl==2.1.0
-http://download.pytorch.org/whl/cpu/torch-1.4.0%2Bcpu-cp38-cp38m-linux_x86_64.whl
-https://download.pytorch.org/whl/cpu/torchvision-0.6.1%2Bcpu-cp38-cp38m-linux_x86_64.whl
+http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torchvision-0.6.1%2Bcpu-cp36-cp36m-linux_x86_64.whl
 urllib3==1.25.9
 Werkzeug==1.0.1
 whitenoise==5.2.0
