@@ -52,7 +52,7 @@ tensorflow-estimator==2.2.0
 tensorflow-cpu==2.2.0
 termcolor==1.1.0
 threadpoolctl==2.1.0
-torch==1.6.0
+http://download.pytorch.org/whl/cpu/torch-1.6.0-cp36-cp36m-linux_x86_64.whl
 urllib3==1.25.9
 Werkzeug==1.0.1
 whitenoise==5.2.0
