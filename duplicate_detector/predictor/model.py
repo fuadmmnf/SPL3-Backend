@@ -5,9 +5,9 @@ from torch.autograd import Variable
 import random
 
 
-class BatchTreeEncoder(nn.Module):
+class StTreeEncoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, encode_dim, batch_size, use_gpu, pretrained_weight=None):
-        super(BatchTreeEncoder, self).__init__()
+        super(StTreeEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.embedding_dim = embedding_dim
         self.encode_dim = encode_dim
@@ -78,9 +78,9 @@ class BatchTreeEncoder(nn.Module):
         return torch.max(self.node_list, 0)[0]
 
 
-class BatchProgramCC(nn.Module):
+class BatchEncoderBiGRU(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, vocab_size, encode_dim, label_size, batch_size, use_gpu=True, pretrained_weight=None):
-        super(BatchProgramCC, self).__init__()
+        super(BatchEncoderBiGRU, self).__init__()
         self.stop = [vocab_size-1]
         self.hidden_dim = hidden_dim
         self.num_layers = 1
@@ -90,8 +90,8 @@ class BatchProgramCC(nn.Module):
         self.embedding_dim = embedding_dim
         self.encode_dim = encode_dim
         self.label_size = label_size
-        self.encoder = BatchTreeEncoder(self.vocab_size, self.embedding_dim, self.encode_dim,
-                                        self.batch_size, self.gpu, pretrained_weight)
+        self.encoder = StTreeEncoder(self.vocab_size, self.embedding_dim, self.encode_dim,
+                                     self.batch_size, self.gpu, pretrained_weight)
         self.root2label = nn.Linear(self.encode_dim, self.label_size)
         # gru
         self.bigru = nn.GRU(self.encode_dim, self.hidden_dim, num_layers=self.num_layers, bidirectional=True,

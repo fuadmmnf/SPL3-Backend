@@ -5,7 +5,7 @@ from django.conf import settings
 import numpy as np
 import torch
 from gensim.models.word2vec import Word2Vec
-from duplicate_detector.predictor.model import BatchProgramCC
+from duplicate_detector.predictor.model import BatchEncoderBiGRU
 
 sys.setrecursionlimit(10000)
 
@@ -36,7 +36,7 @@ class DuplicateDetectorConfig(AppConfig):
     for i in range(1, CATEGORIES_COUNT):
         astnn_model_path = 'astnn/modelClone' + str(i)
         abs_astnn_model_path = os.path.join(settings.MODELS, astnn_model_path)
-        model = BatchProgramCC(EMBEDDING_DIM, HIDDEN_DIM, MAX_TOKENS + 1, ENCODE_DIM, LABELS, BATCH_SIZE, USE_GPU,
-                               embeddings)
+        model = BatchEncoderBiGRU(EMBEDDING_DIM, HIDDEN_DIM, MAX_TOKENS + 1, ENCODE_DIM, LABELS, BATCH_SIZE, USE_GPU,
+                                  embeddings)
         model.load_state_dict(torch.load(abs_astnn_model_path))
         ASTNN_MODELS.append(model)
