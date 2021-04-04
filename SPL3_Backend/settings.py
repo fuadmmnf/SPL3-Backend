@@ -55,7 +55,10 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = True  # If this is used then `CORS_ORIGIN_WHITELIST` will not have any effect
 CORS_ALLOW_CREDENTIALS = False
-
+CORS_ALLOWED_ORIGINS = [
+    "*",
+    "https://spl3clonedetector.netlify.app/",
+]
 ROOT_URLCONF = 'SPL3_Backend.urls'
 
 TEMPLATES = [
